@@ -39,13 +39,37 @@ GROUP BY product_key
 HAVING COUNT(*) > 1;
 
 -- ====================================================================
+-- Checking 'gold.date_key'
+-- ====================================================================
+-- Check for Uniqueness of Date Key in gold.dim_date
+-- Expectation: No results 
+SELECT 
+    date_key,
+    COUNT(*) AS duplicate_count
+FROM gold.dim_date
+GROUP BY date_key
+HAVING COUNT(*) > 1;
+
+-- ====================================================================
 -- Checking 'gold.fact_sales'
 -- ====================================================================
 -- Check the data model connectivity between fact and dimensions
 SELECT * 
 FROM gold.fact_sales f
 LEFT JOIN gold.dim_customers c
-ON c.customer_key = f.customer_key
+    ON c.customer_key = f.customer_key
 LEFT JOIN gold.dim_products p
-ON p.product_key = f.product_key
-WHERE p.product_key IS NULL OR c.customer_key IS NULL  
+    ON p.product_key = f.product_key
+LEFT JOIN gold.dim_date do
+	ON f.order_date_key = do.date_key
+LEFT JOIN gold.dim_date ds
+	ON f.shipping_date_key = ds.date_key
+LEFT JOIN gold.dim_date dd
+	ON f.due_date_key = dd.date_key
+WHERE 
+    p.product_key IS NULL 
+    OR c.customer_key IS NULL
+    OR do.date_key IS NULL
+    OR ds.date_key IS NULL
+    OR dd.date_key IS NULL
+ORDER BY f.order_date_key, f.shipping_date_key, f.due_date_key, f.sales_amount, f.quantity, f.price
