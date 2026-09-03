@@ -153,7 +153,6 @@ BEGIN
 			SELECT ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) - 1 AS day_offset
 			FROM sys.objects a
 			CROSS JOIN sys.objects b
-			CROSS JOIN sys.objects c
 		),
 		DateRange AS (
 			SELECT DATEADD(DAY, day_offset, @start_date) AS date_value
